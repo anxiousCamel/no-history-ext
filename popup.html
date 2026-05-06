@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>No History</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 340px;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0c0c14;
+      color: #e2e8f0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1a0a0a 0%, #0f0f1e 100%);
+      border-bottom: 1px solid #ffffff08;
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e1193820, transparent);
+    }
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #e11938, #7f1d1d);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 12px #e1193840;
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #f8fafc;
+      line-height: 1;
+    }
+
+    .header-text p {
+      font-size: 10px;
+      color: #475569;
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+    }
+
+    .badge {
+      margin-left: auto;
+      background: #e1193810;
+      border: 1px solid #e1193825;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .badge span#badgeCount { color: #e11938; font-weight: 700; font-size: 13px; }
+    .badge span[data-i18n] { font-size: 10px; opacity: 0.8; }
+
+    /* ── Body ── */
+    .body { padding: 14px 14px 6px; }
+
+    /* ── Input row ── */
+    .input-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 10px;
+      color: #334155;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    input {
+      width: 100%;
+      background: #12121e;
+      border: 1px solid #1e2038;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 12.5px;
+      padding: 8px 10px 8px 32px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    input:focus {
+      border-color: #e11938;
+      box-shadow: 0 0 0 3px #e1193812;
+    }
+
+    input::placeholder { color: #2d3748; }
+
+    .add-btn {
+      background: linear-gradient(135deg, #e11938, #9f1239);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 14px;
+      letter-spacing: 0.04em;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px #e1193830;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .add-btn:hover { opacity: 0.88; box-shadow: 0 4px 16px #e1193840; }
+    .add-btn:active { transform: scale(0.96); }
+
+    /* ── Current site button ── */
+    .current-btn {
+      width: 100%;
+      background: #12121e;
+      border: 1px dashed #1e2038;
+      border-radius: 8px;
+      color: #475569;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 7px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      font-family: inherit;
+      overflow: hidden;
+    }
+
+    .current-btn svg { flex-shrink: 0; color: #334155; transition: color 0.2s; }
+    .current-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .current-btn:hover { border-color: #e1193860; color: #94a3b8; background: #16101a; }
+    .current-btn:hover svg { color: #e11938; }
+    .current-btn.success { border-color: #16a34a60; color: #4ade80; background: #0a1a0f; border-style: solid; }
+    .current-btn.success svg { color: #4ade80; }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0 10px;
+    }
+
+    .divider-line { flex: 1; height: 1px; background: #1e2038; }
+    .divider-label { font-size: 10px; color: #334155; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* ── List ── */
+    ul {
+      list-style: none;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 2px;
+      margin-bottom: 8px;
+    }
+
+    ul::-webkit-scrollbar { width: 3px; }
+    ul::-webkit-scrollbar-track { background: transparent; }
+    ul::-webkit-scrollbar-thumb { background: #1e2038; border-radius: 99px; }
+    ul::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    li {
+      align-items: center;
+      background: #12121e;
+      border: 1px solid #1e2038;
+      border-radius: 8px;
+      display: flex;
+      font-size: 12.5px;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      padding: 8px 10px;
+      transition: border-color 0.15s, background 0.15s;
+      animation: slideIn 0.15s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    li:hover { border-color: #2d3758; background: #14142a; }
+
+    .li-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .li-left svg { flex-shrink: 0; color: #334155; }
+
+    li span {
+      word-break: break-all;
+      color: #cbd5e1;
+      font-size: 12px;
+    }
+
+    .remove-btn {
+      background: transparent;
+      border: none;
+      color: #1e2038;
+      cursor: pointer;
+      padding: 3px;
+      border-radius: 5px;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+      margin-left: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .remove-btn:hover { color: #e11938; background: #e1193812; }
+
+    /* ── Empty ── */
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 28px 0 22px;
+      color: #1e2038;
+    }
+
+    .empty p {
+      font-size: 11px;
+      color: #2d3748;
+      text-align: center;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      border-top: 1px solid #ffffff06;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #16a34a;
+      box-shadow: 0 0 6px #16a34a80;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .footer-text {
+      font-size: 10px;
+      color: #2d3748;
+      letter-spacing: 0.03em;
+    }
+
+    .manage-btn {
+      margin-left: auto;
+      background: transparent;
+      border: none;
+      color: #334155;
+      cursor: pointer;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color .15s, background .15s;
+      font-family: inherit;
+    }
+
+    .manage-btn:hover { color: #94a3b8; background: #ffffff08; }
+
+    .coffee-link {
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all .2s;
+      text-decoration: none;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .coffee-link:hover {
+      color: #e2e8f0;
+      background: #ffffff0a;
+    }
+
+    .coffee-link svg {
+      color: #e11938;
+      filter: drop-shadow(0 0 4px #e1193840);
+    }
+
+    /* ── Privacy ── */
+    ul.is-locked li span {
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .lock-btn {
+      background: transparent;
+      border: none;
+      color: #334155;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      border-radius: 6px;
+      transition: all .2s;
+    }
+
+    .lock-btn:hover { color: #94a3b8; background: #ffffff08; }
+    .lock-btn:hover { color: #94a3b8; background: #ffffff08; }
+    .lock-btn.active { color: #e11938; background: #e1193810; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #00000095;
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .modal-overlay.show { display: flex; opacity: 1; }
+
+    .modal-content {
+      background: #0f0f1e;
+      border: 1px solid #ffffff08;
+      border-radius: 16px;
+      padding: 22px;
+      width: 100%;
+      max-width: 290px;
+      box-shadow: 0 20px 40px #00000080;
+      transform: scale(0.9);
+      transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .modal-overlay.show .modal-content { transform: scale(1); }
+
+    .modal-icon {
+      width: 40px;
+      height: 40px;
+      background: #e1193815;
+      color: #e11938;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .modal-content h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+
+    .modal-content p {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+      font-family: inherit;
+    }
+
+    .modal-btn.secondary { background: #1e2038; color: #94a3b8; }
+    .modal-btn.secondary:hover { background: #2d3758; color: #cbd5e1; }
+    .modal-btn.primary { background: linear-gradient(135deg, #e11938, #9f1239); color: #fff; }
+    .modal-btn.primary:hover { opacity: .9; box-shadow: 0 4px 12px #e1193840; }
+
+    /* ── Lock Overlay ── */
+    .lock-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(12, 12, 20, 0.6);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid #ffffff05;
+      overflow: hidden;
+    }
+
+    .lock-overlay.show { display: flex; }
+
+    .lock-overlay-icon {
+      width: 42px;
+      height: 42px;
+      background: #e1193815;
+      color: #e11938;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      border: 1px solid #e1193825;
+      box-shadow: 0 4px 12px #e1193820;
+    }
+
+    .lock-overlay h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+
+    .lock-overlay p {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
+    .unlock-btn-main {
+      background: #e11938;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      box-shadow: 0 4px 12px #e1193840;
+      margin-bottom: 10px;
+    }
+
+    .unlock-btn-main:hover { transform: translateY(-1px); box-shadow: 0 6px 16px #e1193850; }
+    .unlock-btn-main:active { transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1 data-i18n="appName">No History</h1>
+      <p data-i18n="appDesc">Apaga histórico automaticamente</p>
+    </div>
+    <div class="badge" id="badge"><span id="badgeCount">0</span> <span data-i18n="sitesLabel">sites</span></div>
+    <button class="lock-btn" id="lockBtn" data-i18n-title="privacyTitle">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <!-- Input -->
+    <div class="input-row">
+      <div class="input-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input id="domainInput" type="text" data-i18n-placeholder="inputPlaceholder" placeholder="example  ou  exemplo.com" />
+      </div>
+      <button class="add-btn" id="addBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span data-i18n="addBtn">Add</span>
+      </button>
+    </div>
+
+    <!-- Current tab button -->
+    <button class="current-btn" id="addCurrentBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      <span id="currentBtnLabel" data-i18n="addCurrentBtnLabel">Adicionar site atual</span>
+    </button>
+
+    <!-- Divider -->
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-label" data-i18n="blockedLabel">Bloqueados</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- List wrapper to contain overlay -->
+    <div style="position: relative; min-height: 160px;">
+      <ul id="domainList" style="min-height: 160px; margin-bottom: 0;"></ul>
+      
+      <div id="lockOverlay" class="lock-overlay">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div class="lock-overlay-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h4 data-i18n="protectedList">Lista Protegida</h4>
+          <p data-i18n="defaultPinHint">PIN padrão: 1234. Altere nas configurações.</p>
+          <button class="unlock-btn-main" id="unlockBtnMain" data-i18n="unblockBtn">Desbloquear</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <a href="https://buymeacoffee.com/anxiousCamel" target="_blank" class="coffee-link" title="Buy me a coffee">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+        <line x1="10" y1="1" x2="10" y2="4"></line>
+      </svg>
+      <span>Buy me a coffee</span>
+    </a>
+    <button class="manage-btn" id="manageBtn">
+      <span data-i18n="manageBtn">Gerenciar</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h3 id="modalTitle" data-i18n="confirmBtn">Confirmação</h3>
+      <p id="modalMessage"></p>
+      
+      <div id="modalInputContainer" style="display:none; margin-bottom: 20px;">
+        <input id="modalInput" type="password" data-i18n-placeholder="currentPinPlaceholder" placeholder="Digite o PIN" 
+          style="width: 100%; background: #0c0c14; border: 1px solid #e1193860; border-radius: 8px; color: #fff; padding: 10px; outline: none; font-family: inherit; text-align: center; letter-spacing: 0.5em; font-size: 16px;" />
+      </div>
+
+      <div class="modal-actions">
+        <button id="modalCancel" class="modal-btn secondary" data-i18n="cancelBtn">Cancelar</button>
+        <button id="modalJustAdd" class="modal-btn secondary" data-i18n="justAddBtn">Só adicionar</button>
+        <button id="modalConfirm" class="modal-btn primary" data-i18n="confirmBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
