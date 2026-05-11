@@ -414,6 +414,25 @@ document.addEventListener("DOMContentLoaded", () => {
     toast(`${totalDeleted} entrada(s) apagadas do histórico`);
   });
 
+  document.getElementById("clearShortcutsBtn")?.addEventListener("click", async () => {
+    const ok = await askConfirm(
+      "Isso apagará os atalhos da barra de endereço E o histórico de navegação de todos os sites (não só os bloqueados). Deseja continuar?",
+      "Limpar sugestões"
+    );
+    if (!ok) return;
+
+    const btn = document.getElementById("clearShortcutsBtn");
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = "Limpando...";
+
+    await new Promise(r => chrome.browsingData.remove({ since: 0 }, { history: true }, r));
+
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+    toast("Sugestões e histórico limpos. Reinicie o Chrome se ainda aparecerem.");
+  });
+
   document.getElementById("clearAllBtn")?.addEventListener("click", async () => {
     const ok = await askConfirm(`Remover todas as ${allDomains.length} keywords?`, "Limpar lista");
     if (!ok) return;

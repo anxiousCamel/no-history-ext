@@ -7,7 +7,8 @@
   "permissions": [
     "history",
     "storage",
-    "tabs"
+    "tabs",
+    "browsingData"
   ],
   "background": {
     "service_worker": "background.js"

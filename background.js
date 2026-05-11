@@ -24,7 +24,6 @@ function extractHostname(url) {
 
 /**
  * Verifica se a URL contém alguma keyword bloqueada (substring, case-insensitive).
- * Pega pesquisas Google também: "example" bloqueia google.com/search?q=example
  * @param {string} url
  * @param {string[]} blockedDomains
  * @returns {boolean}
@@ -35,13 +34,47 @@ function isUrlBlocked(url, blockedDomains) {
 }
 
 /**
- * Apaga todas as entradas de histórico de uma URL específica.
+ * Retorna a primeira keyword bloqueada que corresponde à URL, ou null.
+ * @param {string} url
+ * @param {string[]} blockedDomains
+ * @returns {string|null}
+ */
+function getMatchedKeyword(url, blockedDomains) {
+  const lower = url.toLowerCase();
+  return blockedDomains.find((kw) => lower.includes(kw.toLowerCase())) ?? null;
+}
+
+/**
+ * Apaga uma entrada específica do histórico.
  * @param {string} url
  * @returns {Promise<void>}
  */
 async function deleteHistoryEntry(url) {
   return new Promise((resolve) => {
     chrome.history.deleteUrl({ url }, resolve);
+  });
+}
+
+/**
+ * Busca e apaga TODAS as entradas do histórico que contenham a keyword.
+ * Isso garante que Top Sites e autocomplete baseado em histórico sejam limpos,
+ * não apenas a visita atual.
+ * @param {string} keyword
+ * @returns {Promise<void>}
+ */
+async function deleteAllMatchingHistory(keyword) {
+  return new Promise((resolve) => {
+    chrome.history.search(
+      { text: keyword, startTime: 0, maxResults: 1000000 },
+      async (items) => {
+        const lower = keyword.toLowerCase();
+        const matching = items.filter(
+          (item) => item.url && item.url.toLowerCase().includes(lower)
+        );
+        await Promise.all(matching.map((item) => deleteHistoryEntry(item.url)));
+        resolve();
+      }
+    );
   });
 }
 
@@ -59,7 +92,11 @@ async function loadBlockedDomains() {
 
 /**
  * Handler principal: disparado toda vez que o browser visita uma URL.
- * Se o domínio estiver na lista, apaga imediatamente.
+ * Se a URL bater com alguma keyword bloqueada, deleta TODAS as entradas
+ * do histórico com aquela keyword (não só a URL atual).
+ * Isso garante que Top Sites e autocomplete baseado em histórico sejam limpos.
+ * Nota: o Shortcuts DB do Chrome (sugestões da barra) é separado e só pode
+ * ser limpo via browsingData — use o botão "Limpar sugestões" nas opções.
  * @param {chrome.history.HistoryItem} historyItem
  */
 async function handleHistoryVisit(historyItem) {
@@ -67,9 +104,10 @@ async function handleHistoryVisit(historyItem) {
   if (!url) return;
 
   const blockedDomains = await loadBlockedDomains();
-  if (isUrlBlocked(url, blockedDomains)) {
-    await deleteHistoryEntry(url);
-  }
+  const matchedKeyword = getMatchedKeyword(url, blockedDomains);
+  if (!matchedKeyword) return;
+
+  await deleteAllMatchingHistory(matchedKeyword);
 }
 
 chrome.history.onVisited.addListener(handleHistoryVisit);
